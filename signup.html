@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniGame</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create your account</h1>
+        <form id="sign-up-form" action="index.html" method="post">
+            <label for="fullname">Full name</label>
+            <input type="text" id="fullname" name="fullname" required autocomplete="name">
+            <label for="sign-up-email">Email</label>
+            <input type="text" id="sign-up-email" name="email" required autocomplete="email">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
+            <label for="sign-up-password">Password</label>
+            <input type="password" id="sign-up-password" name="password" required autocomplete="new-password">
+            <button type="submit" id="signup-submit" value="Sign up">Sign up</button>
+        </form>
+        <p>By signing up, you agree to the <a href="termsofservice.html">Terms of Service</a> and <a href="privacypolicy.html">Privacy Policy</a>.</p>      
+        <p>Already have an account? <a href="signin.html">Sign in</a></p>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+        apiKey: "AIzaSyAW9wCe7H2zn3e7gEamuAUpjL2ow4lxGAQ",
+        authDomain: "anigame-ff3a9.firebaseapp.com",
+        projectId: "anigame-ff3a9",
+        storageBucket: "anigame-ff3a9.appspot.com",
+        messagingSenderId: "263926621908",
+        appId: "1:263926621908:web:178f832755c7985f793d41",
+        measurementId: "G-01ZDTQEQCC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const auth = getAuth(app);
+
+        const email = document.getElementById('sign-up-email');
+        const password = document.getElementById('sign-up-password');
+        const fullname = document.getElementById('fullname');
+        const signupform = document.getElementById('sign-up-form');
+
+        const SignUp = evt => {
+            evt.preventDefault();
+
+            createUserWithEmailAndPassword(auth, email.value, password.value)
+            .then((credentials)=>{
+                set(ref(db, 'UsersAuthList/' + credentials.user.uid),{
+                    fullname: fullname.value
+                });
+                sessionStorage.setItem("user-creds", JSON.stringify(credentials.user));
+                window.location.href = 'index.html';
+            })
+            .catch((error)=>{
+                alert(error.message);
+                console.log(error.code);
+                console.log(error.message); 
+            });
+
+        };
+
+        signupform.addEventListener('submit', SignUp);
+
+        // MutationObserver to detect changes in input fields
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    console.log('Input value changed:', mutation.target.value);
+                    // You can perform any actions you want here
+                }
+            });
+        });
+
+        // Configure MutationObserver to observe changes in input fields
+        const config = { attributes: true, subtree: true, attributeFilter: ['value'] };
+        observer.observe(document.getElementById('fullname'), config);
+        observer.observe(document.getElementById('sign-up-email'), config);
+        observer.observe(document.getElementById('username'), config);
+        observer.observe(document.getElementById('sign-up-password'), config);
+
+    </script>
+
+</body>
+</html>

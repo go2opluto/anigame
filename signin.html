@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniGame</title>  
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sign in</h1>
+        <form id="sign-in-form">
+            <label for="sign-in-email">Email</label>
+            <input type="text" id="sign-in-email" name="email" required autocomplete="email">
+            <label for="sign-in-password">Password</label>
+            <input type="password" id="sign-in-password" name="password" required autocomplete="current-password">
+            <button type="submit" id="sign-in-submit">Sign in</button>
+        </form>
+        <p>Forgot password?</p>
+        <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+
+
+    <!-- <script>
+        // Check if the user is on the sign-in page
+        if (window.location.pathname === '/signin.html' || window.location.pathname === '/signin') {
+            // If they are, make the logo link scroll to the top of the page
+            document.getElementById('logo').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+            });
+    
+            // Your sign-in logic
+            // ...
+    
+            // After a successful sign-in, redirect the user to the index page
+            sessionStorage.setItem('isSignedIn', true);
+            window.location.assign('index.html');
+        } else if (sessionStorage.getItem('isSignedIn') === 'true') {
+            // If the user has signed in before, redirect them to the index page
+            window.location.assign('index.html');
+        }
+    </script> -->
+
+    <script type="module">
+
+        document.getElementById('sign-in-form').addEventListener('submit', (event) => {
+                    event.preventDefault();    
+        });
+
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, set, ref, child, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+
+        const firebaseConfig = {
+        apiKey: "AIzaSyAW9wCe7H2zn3e7gEamuAUpjL2ow4lxGAQ",
+        authDomain: "anigame-ff3a9.firebaseapp.com",
+        projectId: "anigame-ff3a9",
+        storageBucket: "anigame-ff3a9.appspot.com",
+        messagingSenderId: "263926621908",
+        appId: "1:263926621908:web:178f832755c7985f793d41",
+        measurementId: "G-01ZDTQEQCC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const auth = getAuth(app);
+        const dbref = ref(db);
+
+        const email = document.getElementById('sign-in-email');
+        const password = document.getElementById('sign-in-password');
+        const signinform = document.getElementById('sign-in-form');
+
+        const SignIn = evt => {
+            evt.preventDefault();
+
+            signInWithEmailAndPassword(auth, email.value, password.value)
+            .then((credentials)=>{
+                get(child(dbref, 'UsersAuthList/' + credentials.user.uid)).then((snapshot) => {
+                    if(snapshot.exists){
+                        localStorage.setItem("user-info", JSON.stringify({
+                            // fullname: snapshot.val().fullname
+                        }));
+                        localStorage.setItem("user-creds", JSON.stringify(credentials.user));
+                        window.location.assign('index.html');
+
+                        //Enable the sign-in button
+                        document.getElementById('sign-in-submit').disabled = false;
+
+                    }else{
+                        console.log("User not found");
+                        alert("This account does not exist");
+
+                        // Disable the sign-in button
+                        document.getElementById('sign-in-submit').disabled = true;
+
+                    }
+                });
+            })
+            .catch((error)=>{
+                alert(error.message);
+                console.log(error.code);
+                console.log(error.message); 
+
+                // Disable the sign-in button
+                document.getElementById('sign-in-submit').disabled = true;
+    
+            });
+        };
+
+        signinform.addEventListener('submit', SignIn);
+
+        //check if the user has signed in before
+        if (localStorage.getItem('isSignedIn')==='true'){
+            window.location.assign('index.html')
+        }    
+
+        // MutationObserver to detect changes in input fields
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    console.log('Input value changed:', mutation.target.value);
+                    // You can perform any actions you want here
+                }
+            });
+        });
+
+        // Configure MutationObserver to observe changes in input fields
+        const config = { attributes: true, subtree: true, attributeFilter: ['value'] };
+        observer.observe(document.getElementById('sign-in-email'), config);
+        observer.observe(document.getElementById('sign-in-password'), config);
+
+        if(window.location.pathname === '/signin.html' || window.location.pathname === '/signin')
+        document.getElementById('logo').addEventListener('click', function (e){
+            e.preventDefault()
+            document.getElementById('top').scrollIntoView({ behavior: 'smooth'})
+
+            localStorage.setItem('isSigned', true);
+            window.location.assign('index.html')
+        })
+        else if (localStorage.getItem('isSigned') === 'true'){
+            window.location.assign('index.html')
+        }
+
+
+    </script>
+</body>
+</html>
